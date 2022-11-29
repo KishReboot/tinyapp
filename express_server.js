@@ -11,7 +11,8 @@ const urlDatabase = {
 
 app.use(express.urlencoded({ extended: true }));
 
-function generateRandomString() {
+// Used to generate a 6 character shortURL
+const generateRandomString = () => {
 
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let random = '';
@@ -23,21 +24,32 @@ function generateRandomString() {
   }
 
   return random;
+
 };
 
+// Routes
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
+
 app.post('/urls', (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
-})
+});
+
 
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
+});
+
+app.post('/urls/:id/delete', (req, res) => {
+
+  delete urlDatabase[req.params.id];
+  res.redirect('/urls');
+
 });
 
 app.get("/u/:id", (req, res) => {
@@ -50,10 +62,12 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+//Server start
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
