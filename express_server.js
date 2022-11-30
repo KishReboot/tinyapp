@@ -104,6 +104,13 @@ app.post('/logout', (req, res) => {
 
 });
 
+app.get('/register', (req, res) => {
+
+  let templateVars = {username: req.cookies['username']};
+  res.render('urls_registration', templateVars);
+
+});
+
 //Server start
 app.listen(PORT, () => {
 
