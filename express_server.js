@@ -7,9 +7,17 @@ app.use(cookieParser());
 
 app.set("view engine", "ejs");
 
+const users = {
+
+
+
+};
+
 const urlDatabase = {
+
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
+
 };
 
 app.use(express.urlencoded({ extended: true }));
@@ -34,7 +42,7 @@ const generateRandomString = () => {
 
 app.get("/urls", (req, res) => {
 
-  const templateVars = { urls: urlDatabase, username: req.cookies['username'] };
+  const templateVars = { urls: urlDatabase, user: users[req.cookies['user_ID']] };
   res.render("urls_index", templateVars);
 
 });
@@ -49,7 +57,7 @@ app.post('/urls', (req, res) => {
 
 app.get("/urls/new", (req, res) => {
 
-  let templateVars = {username: req.cookies['username']};
+  const templateVars = { user: users[req.cookies['user_ID']] };
   res.render("urls_new", templateVars);
 
 });
@@ -78,7 +86,7 @@ app.get("/u/:id", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], username: req.cookies['username'] };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], user: users[req.cookies['user_ID']] };
   res.render("urls_show", templateVars);
 
 });
@@ -93,7 +101,7 @@ app.get("/urls.json", (req, res) => {
 app.post('/login', (req, res) => {
 
   res.cookie('username', req.body.username);
-  res.redirect('/urls')
+  res.redirect('/urls');
 
 });
 
@@ -106,15 +114,32 @@ app.post('/logout', (req, res) => {
 
 app.get('/register', (req, res) => {
 
-  let templateVars = {username: req.cookies['username']};
+  const templateVars = { user: users[req.cookies['user_ID']] };
   res.render('urls_registration', templateVars);
+
+});
+
+app.post('/register', (req, res) => {
+  
+  const userID = generateRandomString();
+  users[userID] = {
+
+    userID,
+    email: req.body.email,
+    password: req.body.password,
+
+  };
+
+  res.cookie('user_ID', userID);
+ 
+  res.redirect('/urls');
 
 });
 
 //Server start
 app.listen(PORT, () => {
 
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`TinyApp server listening on ${PORT}!`);
 
 });
 
