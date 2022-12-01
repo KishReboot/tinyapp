@@ -1,11 +1,11 @@
-const express = require("express");
+const express = require('express');
 const app = express();
 const PORT = 8080;
 
-const cookieParser = require("cookie-parser");
+const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
-app.set("view engine", "ejs");
+app.set('view engine', 'ejs');
 
 const users = {
 
@@ -15,8 +15,8 @@ const users = {
 
 const urlDatabase = {
 
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  'b2xVn2': 'http://www.lighthouselabs.ca',
+  '9sm5xK': 'http://www.google.com'
 
 };
 
@@ -55,13 +55,21 @@ const generateRandomString = () => {
 
 // Routes
 
-app.get("/urls", (req, res) => {
-
-  const templateVars = { urls: urlDatabase, user: users[req.cookies['user_ID']] };
-  res.render("urls_index", templateVars);
+app.get('/urls.json', (req, res) => {
+  
+  res.json(urlDatabase);
 
 });
 
+// Index
+app.get('/urls', (req, res) => {
+
+  const templateVars = { urls: urlDatabase, user: users[req.cookies['user_ID']] };
+  res.render('urls_index', templateVars);
+
+});
+
+// POST to generate a RNG for the shortURL, and adds to the urlDatabase
 app.post('/urls', (req, res) => {
 
   const shortURL = generateRandomString();
@@ -70,13 +78,23 @@ app.post('/urls', (req, res) => {
 
 });
 
-app.get("/urls/new", (req, res) => {
+// New URL page
+app.get('/urls/new', (req, res) => {
 
   const templateVars = { user: users[req.cookies['user_ID']] };
-  res.render("urls_new", templateVars);
+  res.render('urls_new', templateVars);
 
 });
 
+// My URL page, showing the short and long urls
+app.get('/urls/:id', (req, res) => {
+  
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], user: users[req.cookies['user_ID']] };
+  res.render('urls_show', templateVars);
+
+});
+
+// Update/Edit POST
 app.post('/urls/:id', (req, res) => {
 
   const shortURL = req.params.id;
@@ -85,36 +103,31 @@ app.post('/urls/:id', (req, res) => {
 
 });
 
+// Delete POST
 app.post('/urls/:id/delete', (req, res) => {
 
-  delete urlDatabase[req.params.id];
+  delete urlDatabase[req.params.id]; 
   res.redirect('/urls');
 
 });
 
-app.get("/u/:id", (req, res) => {
+app.get('/u/:id', (req, res) => {
 
   const longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
 
 });
 
-app.get("/urls/:id", (req, res) => {
-  
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], user: users[req.cookies['user_ID']] };
-  res.render("urls_show", templateVars);
+app.get('/login', (req, res) => {
+
+  const templateVars = {user: users[req.cookies['user_ID']]};
+  res.render('urls_login', templateVars);
 
 });
 
-
-app.get("/urls.json", (req, res) => {
-  
-  res.json(urlDatabase);
-
-});
 
 app.post('/login', (req, res) => {
-
+  
   res.cookie('username', req.body.username);
   res.redirect('/urls');
 
@@ -122,7 +135,7 @@ app.post('/login', (req, res) => {
 
 app.post('/logout', (req, res) => {
 
-  res.clearCookie('username');
+  res.clearCookie('user_ID');
   res.redirect('/urls');
 
 });
@@ -134,10 +147,6 @@ app.get('/register', (req, res) => {
 
 });
 
-// If the e-mail or password are empty strings, send back a response with the
-// 400 status code.
-// If someone tries to register with an email that is already in the users
-// object, send back a response with the 400 status code.
 app.post('/register', (req, res) => {
   
   if (req.body.email || req.body.password) {
