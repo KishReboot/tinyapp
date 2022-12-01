@@ -5,6 +5,8 @@ const PORT = 8080;
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
+const bcrypt = require('bcryptjs');
+
 app.set('view engine', 'ejs');
 
 const urlDatabase = {};
@@ -155,7 +157,7 @@ app.post('/login', (req, res) => {
 
   const user = getUserByEmail(req.body.email, users);
   if (user) {
-    if (req.body.password === user.password) {
+    if (bcrypt.compareSync(req.body.password, user.password)) {
       res.cookie('user_id', user.userID);
       res.redirect('/urls');
     } else {
@@ -196,7 +198,7 @@ app.post('/register', (req, res) => {
 
         userID,
         email: req.body.email,
-        password: req.body.password,
+        password: bcrypt.hashSync(req.body.password, 10),
 
       };
 
