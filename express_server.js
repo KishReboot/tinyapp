@@ -22,6 +22,21 @@ const urlDatabase = {
 
 app.use(express.urlencoded({ extended: true }));
 
+const getUserByEmail = (email) => {
+
+  for (const user in users) {
+
+    if (users[user].email === email) {
+
+      return true;
+
+    }
+
+  }
+
+  return false;
+};
+
 // Used to generate a 6 character shortURL
 const generateRandomString = () => {
 
@@ -119,20 +134,42 @@ app.get('/register', (req, res) => {
 
 });
 
+// If the e-mail or password are empty strings, send back a response with the
+// 400 status code.
+// If someone tries to register with an email that is already in the users
+// object, send back a response with the 400 status code.
 app.post('/register', (req, res) => {
   
-  const userID = generateRandomString();
-  users[userID] = {
+  if (req.body.email || req.body.password) {
+    
+    if (!getUserByEmail(req.body.email)) {
+  
+      const userID = generateRandomString();
+      users[userID] = {
 
-    userID,
-    email: req.body.email,
-    password: req.body.password,
+        userID,
+        email: req.body.email,
+        password: req.body.password,
 
-  };
+      };
 
-  res.cookie('user_ID', userID);
+      res.cookie('user_ID', userID);
  
-  res.redirect('/urls');
+      res.redirect('/urls');
+
+    } else {
+      
+      res.statusCode = 400;
+      res.send('<h2>400 - Bad Request<br>This email is already registered.</h2>');
+
+    }
+
+  } else {
+
+    res.statusCode = 400;
+    res.send('<h2>400 - Bad Request<br>One or more fields have been left blank</h2>');
+
+  }
 
 });
 
