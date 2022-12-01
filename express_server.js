@@ -7,12 +7,7 @@ app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 
-const urlDatabase = {
-  
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com'
-  
-};
+const urlDatabase = {};
 
 const users = {};
 
@@ -33,7 +28,6 @@ const getUserByEmail = (email, database) => {
   return undefined;
 };
 
-// Used to generate a 6 character shortURL
 const generateRandomString = () => {
 
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -49,7 +43,22 @@ const generateRandomString = () => {
 
 };
 
-// Routes
+const userURLS = (id) => {
+
+  let userURLs = {};
+
+  for (const shortURL in urlDatabase) {
+
+    if (urlDatabase[shortURL].userID === id) {
+
+      userURLs[shortURL] = urlDatabase[shortURL];
+
+    }
+
+  }
+
+  return userURLs;
+};
 
 app.get('/urls.json', (req, res) => {
   
@@ -57,49 +66,60 @@ app.get('/urls.json', (req, res) => {
 
 });
 
-// Index
 app.get('/urls', (req, res) => {
 
-  const templateVars = { urls: urlDatabase, user: users[req.cookies['user_id']] };
+  const userID = req.cookies['user_id'];
+  const userURLs = userURLS(userID);
+  const templateVars = { urls: userURLs, user: users[userID] };
   res.render('urls_index', templateVars);
 
 });
 
-// POST to generate a RNG for the shortURL, and adds to the urlDatabase
 app.post('/urls', (req, res) => {
 
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
+  urlDatabase[shortURL] = {
+
+    longURL: req.body.longURL,
+    userID: req.cookies['user_id'],
+
+  };
+  
   res.redirect(`/urls/${shortURL}`);
 
 });
 
-// New URL page
+
 app.get('/urls/new', (req, res) => {
 
-  const templateVars = { user: users[req.cookies['user_id']] };
-  res.render('urls_new', templateVars);
+  if (req.cookies['user_id']) {
+    
+    const templateVars = { user: users[req.cookies['user_id']] };
+    res.render('urls_new', templateVars);
+
+  } else {
+
+    res.redirect('/login');
+
+  }
 
 });
 
-// My URL page, showing the short and long urls
 app.get('/urls/:id', (req, res) => {
   
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], user: users[req.cookies['user_id']] };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, user: users[req.cookies['user_id']] };
   res.render('urls_show', templateVars);
 
 });
 
-// Update/Edit POST
 app.post('/urls/:id', (req, res) => {
 
   const shortURL = req.params.id;
-  urlDatabase[shortURL] = req.body.updatedURL;
+  urlDatabase[shortURL].longURL = req.body.updatedURL;
   res.redirect(`/urls/${shortURL}`);
 
 });
 
-// Delete POST
 app.post('/urls/:id/delete', (req, res) => {
 
   delete urlDatabase[req.params.id];
@@ -109,11 +129,11 @@ app.post('/urls/:id/delete', (req, res) => {
 
 app.get('/u/:id', (req, res) => {
 
-  const longURL = urlDatabase[req.params.id];
+  const longURL = urlDatabase[req.params.id].longURL;
 
   if (longURL) {
 
-    res.redirect(urlDatabase[req.params.shortURL]);
+    res.redirect(urlDatabase[req.params.shortURL].longURL);
 
   } else {
 
@@ -130,7 +150,6 @@ app.get('/login', (req, res) => {
   res.render('urls_login', templateVars);
 
 });
-
 
 app.post('/login', (req, res) => {
 
@@ -201,7 +220,6 @@ app.post('/register', (req, res) => {
 
 });
 
-//Server start
 app.listen(PORT, () => {
 
   console.log(`TinyApp server listening on ${PORT}!`);
