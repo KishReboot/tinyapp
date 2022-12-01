@@ -15,11 +15,12 @@
   <body>
     <%- include('partials/_header') %>
     <main style="margin: 1em;">
+      <h1>Login</h1>
       <form action="/login" method="POST">
         <div>
-          <label for="email"> Email address</label>
+          <label for="email"><h6>Email address</h6></label>
           <input class="form-control mb-3" type="email" name="email" placeholder="Enter your email" style="width: 300px">
-          <label for="password">Password</label>
+          <label for="password"><h6>Password</h6></label>
           <input class="form-control mb-3" type="password" placeholder="Enter your password" style="width: 300px">
           <button type="submit" class="btn btn-primary">Login</button>
         </div>

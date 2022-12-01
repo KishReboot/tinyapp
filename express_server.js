@@ -7,34 +7,30 @@ app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 
-const users = {
-
-
-
-};
-
 const urlDatabase = {
-
+  
   'b2xVn2': 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com'
-
+  
 };
+
+const users = {};
 
 app.use(express.urlencoded({ extended: true }));
 
-const getUserByEmail = (email) => {
+const getUserByEmail = (email, database) => {
 
-  for (const user in users) {
+  for (const user in database) {
 
-    if (users[user].email === email) {
+    if (database[user].email === email) {
 
-      return true;
+      return database[user];
 
     }
 
   }
 
-  return false;
+  return undefined;
 };
 
 // Used to generate a 6 character shortURL
@@ -64,7 +60,7 @@ app.get('/urls.json', (req, res) => {
 // Index
 app.get('/urls', (req, res) => {
 
-  const templateVars = { urls: urlDatabase, user: users[req.cookies['user_ID']] };
+  const templateVars = { urls: urlDatabase, user: users[req.cookies['user_id']] };
   res.render('urls_index', templateVars);
 
 });
@@ -81,7 +77,7 @@ app.post('/urls', (req, res) => {
 // New URL page
 app.get('/urls/new', (req, res) => {
 
-  const templateVars = { user: users[req.cookies['user_ID']] };
+  const templateVars = { user: users[req.cookies['user_id']] };
   res.render('urls_new', templateVars);
 
 });
@@ -89,7 +85,7 @@ app.get('/urls/new', (req, res) => {
 // My URL page, showing the short and long urls
 app.get('/urls/:id', (req, res) => {
   
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], user: users[req.cookies['user_ID']] };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], user: users[req.cookies['user_id']] };
   res.render('urls_show', templateVars);
 
 });
@@ -106,7 +102,7 @@ app.post('/urls/:id', (req, res) => {
 // Delete POST
 app.post('/urls/:id/delete', (req, res) => {
 
-  delete urlDatabase[req.params.id]; 
+  delete urlDatabase[req.params.id];
   res.redirect('/urls');
 
 });
@@ -114,35 +110,58 @@ app.post('/urls/:id/delete', (req, res) => {
 app.get('/u/:id', (req, res) => {
 
   const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
+
+  if (longURL) {
+
+    res.redirect(urlDatabase[req.params.shortURL]);
+
+  } else {
+
+    res.statusCode = 404;
+    res.send('<h2>404 Not Found<br>This short URL doesn not exist.</h2>');
+    
+  }
 
 });
 
 app.get('/login', (req, res) => {
 
-  const templateVars = {user: users[req.cookies['user_ID']]};
+  const templateVars = {user: users[req.cookies['user_id']]};
   res.render('urls_login', templateVars);
 
 });
 
 
 app.post('/login', (req, res) => {
-  
-  res.cookie('username', req.body.username);
-  res.redirect('/urls');
 
+  const user = getUserByEmail(req.body.email, users);
+  if (user) {
+    if (req.body.password === user.password) {
+      res.cookie('user_id', user.userID);
+      res.redirect('/urls');
+    } else {
+
+      res.statusCode = 403;
+      res.send('<h2>403 Forbidden<br> Wrong password has been entered.</h2>');
+    }
+  } else {
+
+    res.statusCode = 403;
+    res.send('<h2>403 Forbidden<br> This email is not registered.</h2>');
+
+  }
 });
 
 app.post('/logout', (req, res) => {
 
-  res.clearCookie('user_ID');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 
 });
 
 app.get('/register', (req, res) => {
 
-  const templateVars = { user: users[req.cookies['user_ID']] };
+  const templateVars = { user: users[req.cookies['user_id']] };
   res.render('urls_registration', templateVars);
 
 });
@@ -151,7 +170,7 @@ app.post('/register', (req, res) => {
   
   if (req.body.email || req.body.password) {
     
-    if (!getUserByEmail(req.body.email)) {
+    if (!getUserByEmail(req.body.email, users)) {
   
       const userID = generateRandomString();
       users[userID] = {
@@ -162,7 +181,7 @@ app.post('/register', (req, res) => {
 
       };
 
-      res.cookie('user_ID', userID);
+      res.cookie('user_id', userID);
  
       res.redirect('/urls');
 
