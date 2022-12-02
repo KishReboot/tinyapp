@@ -5,6 +5,8 @@ const PORT = 8080;
 const cookieSession = require('cookie-session');
 app.use(cookieSession({ name: 'session', secret: 'paper-mario-sixty-four' }));
 
+const { getUserByEmail } = require('/helpers');
+
 const bcrypt = require('bcryptjs');
 
 app.set('view engine', 'ejs');
@@ -15,20 +17,7 @@ const users = {};
 
 app.use(express.urlencoded({ extended: true }));
 
-const getUserByEmail = (email, database) => {
 
-  for (const user in database) {
-
-    if (database[user].email === email) {
-
-      return database[user];
-
-    }
-
-  }
-
-  return undefined;
-};
 
 const generateRandomString = () => {
 
