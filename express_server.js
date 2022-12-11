@@ -3,20 +3,18 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 
-const cookieSession = require('cookie-session');
-app.use(cookieSession({ name: 'session', secret: 'paper-mario-sixty-four' }));
-
 const { getUserByEmail, userURLS, generateRandomString } = require('./helpers');
-
 const bcrypt = require('bcryptjs');
+const cookieSession = require('cookie-session');
+
+app.use(cookieSession({ name: 'session', secret: 'paper-mario-sixty-four' }));
+app.use(express.urlencoded({ extended: true }));
 
 app.set('view engine', 'ejs');
 
 // User and URL objects
 const urlDatabase = {};
 const users = {};
-
-app.use(express.urlencoded({ extended: true }));
 
 // Routes for GETs and POSTs
 
@@ -204,6 +202,7 @@ app.get('/register', (req, res) => {
 });
 
 // Validates user info and redirects
+// Uses uses bcrypt library for helping securely encrypt user information
 app.post('/register', (req, res) => {
   
   if (req.body.email || req.body.password) {
