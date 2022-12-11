@@ -6,21 +6,32 @@ const PORT = 8080;
 const { getUserByEmail, userURLS, generateRandomString } = require('./helpers');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
-const {urlDatabase, users} = require('./database');
 
 app.use(cookieSession({ name: 'session', secret: 'paper-mario-sixty-four' }));
 app.use(express.urlencoded({ extended: true }));
 
 app.set('view engine', 'ejs');
 
+const urlDatabase = {
 
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
+
+};
+
+const users = {
+
+
+};
 
 // Routes for GETs and POSTs
 
 // Redirects to login if not logged in
 app.get('/', (req, res) => {
 
-  if (req.session.userID) {
+  const user = req.session.userID;
+
+  if (user) {
 
     res.redirect('/urls');
 
@@ -93,7 +104,7 @@ app.get('/urls/:id', (req, res) => {
   
   const shortURL = req.params.id;
   const userID = req.session.userID;
-  const userURLS = urlsForUser(userID, urlDatabase);
+  const userURLS = userURLS(userID, urlDatabase);
   const templateVars = { urlDatabase, userURLS, shortURL, user: users[userID] };
   
   if (!urlDatabase[shortURL]) {
@@ -101,7 +112,7 @@ app.get('/urls/:id', (req, res) => {
     const errorMsg = "This URL does not exist";
     res.status(404).render('urls_error', {user: users[userID], errorMsg});
     
-  } else if (!userid || !userURLS[shortURL]) {
+  } else if (!userID || !userURLS[shortURL]) {
     
     const errorMsg = "This does not belong to you.";
     res.status(401).render('urls_error', {user: users[userID], errorMsg});
@@ -166,15 +177,21 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
 
   const user = getUserByEmail(req.body.email, users);
+
   if (user) {
+
     if (bcrypt.compareSync(req.body.password, user.password)) {
+
       req.session.userID = user.userID;
       res.redirect('/urls');
+    
     } else {
 
       res.statusCode = 403;
       res.send('<h2>403 Forbidden<br> Wrong password has been entered.</h2>');
+    
     }
+  
   } else {
 
     res.statusCode = 403;
@@ -195,6 +212,12 @@ app.post('/logout', (req, res) => {
 // User registration page
 app.get('/register', (req, res) => {
 
+  if (req.session.userID) {
+
+    res.redirect('/urls');
+    return;
+  }
+
   const templateVars = { user: users[req.session.userID] };
   res.render('urls_registration', templateVars);
 
@@ -204,16 +227,20 @@ app.get('/register', (req, res) => {
 // Uses uses bcrypt library for helping securely encrypt user information
 app.post('/register', (req, res) => {
   
-  if (req.body.email || req.body.password) {
+  if (req.body.email && req.body.password) {
     
     if (!getUserByEmail(req.body.email, users)) {
-  
+      
       const userID = generateRandomString();
+      
+      const password = req.body.password;
+      
+      
       users[userID] = {
 
         userID,
         email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, 10),
+        password: bcrypt.hashSync(password, 10),
 
       };
 
