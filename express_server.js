@@ -6,15 +6,14 @@ const PORT = 8080;
 const { getUserByEmail, userURLS, generateRandomString } = require('./helpers');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
+const {urlDatabase, users} = require('./database');
 
 app.use(cookieSession({ name: 'session', secret: 'paper-mario-sixty-four' }));
 app.use(express.urlencoded({ extended: true }));
 
 app.set('view engine', 'ejs');
 
-// User and URL objects
-const urlDatabase = {};
-const users = {};
+
 
 // Routes for GETs and POSTs
 
