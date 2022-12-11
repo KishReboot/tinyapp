@@ -1,8 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+ 
   <head>
+    
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    
+    <meta 
+    name="viewport" 
+    content="width=device-width, 
+    initial-scale=1.0"/>
+    
     <!-- Bootstrap CSS -->
     <link
       rel="stylesheet"
@@ -10,20 +17,21 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
+
     <title>TinyApp</title>
+
   </head>
 
   <body>
     <%- include('partials/_header') %>
-    <% if (user) { %>
-      <% if (urls[id])
+
     <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= urls[id].longURL %></h5>
-        <p class="card-text">
-          Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
+        <p class="card-text">Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
         </p>
+      </div>
         <h3>Edit</h3> 
         <form class="form-inline" action="/urls/<%= id %>" method="POST">
           <div class="form-group mb-2 mx-auto">
@@ -40,7 +48,8 @@
         </form>
       </div>
       <div class="card-footer text-muted"></div>
-    </div>
+    </div> 
+
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -57,5 +66,6 @@
       integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
       crossorigin="anonymous"
     ></script>
+    
   </body>
 </html>

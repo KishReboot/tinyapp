@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+  
   <head>
+    
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    
+    <meta 
+      name="viewport" 
+      content="width=device-width, initial-scale=1.0"
+    />
 
     <!-- Bootstrap CSS -->
     <link
@@ -11,10 +17,14 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
+
     <title>TinyApp</title>
+
   </head>
+
   <body>
     <%- include('partials/_header') %>
+
     <main style="margin: 1em;"> 
       <form action="/register" method="POST">
         <h1>Register</h1>
@@ -27,6 +37,7 @@
         </div>
       </form>
     </main>
+
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -43,5 +54,6 @@
       integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
       crossorigin="anonymous"
     ></script>
+
   </body>
 </html>
