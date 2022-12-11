@@ -1,7 +1,7 @@
 {
   "name": "tinyapp",
   "version": "1.0.0",
-  "description": "",
+  "description": "An application that takes in a user submitted url, randomly generates an alphanumeric code to use as a shortURL, and adds both to a database for the user.",
   "main": "index.js",
   "scripts": {
     "start": "./node_modules/.bin/nodemon -L express_server.js",
