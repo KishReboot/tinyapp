@@ -226,7 +226,7 @@ app.get('/register', (req, res) => {
 // Validates user info and redirects
 // Uses uses bcrypt library for helping securely encrypt user information
 app.post('/register', (req, res) => {
-  
+
   if (req.body.email && req.body.password) {
     
     if (!getUserByEmail(req.body.email, users)) {
