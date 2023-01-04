@@ -2,7 +2,7 @@
 const express = require('express');
 const app = express();
 const PORT = 8080;
-
+const { urlDatabase, users } = require('./database')
 const { getUserByEmail, userURLS, generateRandomString } = require('./helpers');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
@@ -11,18 +11,6 @@ app.use(cookieSession({ name: 'session', secret: 'paper-mario-sixty-four' }));
 app.use(express.urlencoded({ extended: true }));
 
 app.set('view engine', 'ejs');
-
-const urlDatabase = {
-
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-
-};
-
-const users = {
-
-
-};
 
 // Routes for GETs and POSTs
 
@@ -104,21 +92,22 @@ app.get('/urls/:id', (req, res) => {
   
   const shortURL = req.params.id;
   const userID = req.session.userID;
-  const userURLS = userURLS(userID, urlDatabase);
-  const templateVars = { urlDatabase, userURLS, shortURL, user: users[userID] };
+  const URLS = urlDatabase[shortURL];
+  const templateVars = { urlDatabase, URLS, shortURL, user: users[userID] };
   
   if (!urlDatabase[shortURL]) {
 
     const errorMsg = "This URL does not exist";
     res.status(404).render('urls_error', {user: users[userID], errorMsg});
     
-  } else if (!userID || !userURLS[shortURL]) {
+  } else if (!userID || !URLS) {
     
     const errorMsg = "This does not belong to you.";
     res.status(401).render('urls_error', {user: users[userID], errorMsg});
     
   } else {
-  
+    
+    
     res.render('urls_show', templateVars);
   
   }
@@ -127,8 +116,10 @@ app.get('/urls/:id', (req, res) => {
 // Edits the original URL
 app.post('/urls/:id', (req, res) => {
 
+ 
   const shortURL = req.params.id;
   urlDatabase[shortURL].longURL = req.body.updatedURL;
+  
   res.redirect(`/urls/${shortURL}`);
 
 });
@@ -144,16 +135,18 @@ app.post('/urls/:id/delete', (req, res) => {
 // Redirection to original URLS webpage
 app.get('/u/:id', (req, res) => {
 
-  const longURL = urlDatabase[req.params.id].longURL;
+  const foundURL = urlDatabase[req.params.id];
 
-  if (longURL) {
+  if (foundURL) {
 
-    res.redirect(urlDatabase[req.params.shortURL].longURL);
+    res.redirect(foundURL.longURL);
 
   } else {
 
+    let errorMsg = "This shortURL is not found"
+    const templateVars = { errorMsg, user: users[req.session.userID] };
     res.statusCode = 404;
-    res.send('<h2>404 Not Found<br>This short URL doesn not exist.</h2>');
+    res.render('urls_error', templateVars);
     
   }
 
@@ -177,7 +170,7 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
 
   const user = getUserByEmail(req.body.email, users);
-
+  
   if (user) {
 
     if (bcrypt.compareSync(req.body.password, user.password)) {
@@ -232,15 +225,15 @@ app.post('/register', (req, res) => {
     if (!getUserByEmail(req.body.email, users)) {
       
       const userID = generateRandomString();
-      
-      const password = req.body.password;
+      const email = req.body.email;
+      const password = bcrypt.hashSync(req.body.password, 10);
       
       
       users[userID] = {
-
+        
         userID,
-        email: req.body.email,
-        password: bcrypt.hashSync(password, 10),
+        email,
+        password,
 
       };
 
