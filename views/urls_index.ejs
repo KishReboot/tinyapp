@@ -46,7 +46,8 @@
                <a class="btn btn-primary" href="/urls/<%= id %>">Edit</a>
               </td>
               <td>
-                <a class="btn btn-danger" href="/urls/<%= id %>/delete">Delete</a>
+              <form action="/urls/<%= id %>/delete" method="POST">
+                <button type="submit" class="btn btn-danger">Delete</button>
               </form>
               </td>
             </tr>
